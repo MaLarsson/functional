@@ -9,14 +9,36 @@ namespace detail {
 
 template <std::size_t Index, typename Tuple, typename... Args>
 constexpr decltype(auto) invoke_index(Tuple&& tuple, Args&&... args) {
+    using fn_sig = decltype(std::get<Index>(std::forward<Tuple>(tuple)));
+
     if constexpr (Index == 0) {
-        return std::invoke(std::get<Index>(std::forward<Tuple>(tuple)),
-                           std::forward<Args>(args)...);
+        constexpr bool invocable =
+            std::is_invocable_v<fn_sig, decltype(std::forward<Args>(args))...>;
+
+        if constexpr (invocable) {
+            return std::invoke(std::get<Index>(std::forward<Tuple>(tuple)),
+                               std::forward<Args>(args)...);
+        } else {
+            return std::apply(std::get<Index>(std::forward<Tuple>(tuple)),
+                              std::forward<Args>(args)...);
+        }
     } else {
-        return std::invoke(
-            std::get<Index>(std::forward<Tuple>(tuple)),
-            invoke_index<Index - 1>(std::forward<Tuple>(tuple),
-                                    std::forward<Args>(args)...));
+        constexpr bool invocable =
+            std::is_invocable_v<fn_sig, decltype(invoke_index<Index - 1>(
+                                            std::forward<Tuple>(tuple),
+                                            std::forward<Args>(args)...))>;
+
+        if constexpr (invocable) {
+            return std::invoke(
+                std::get<Index>(std::forward<Tuple>(tuple)),
+                invoke_index<Index - 1>(std::forward<Tuple>(tuple),
+                                        std::forward<Args>(args)...));
+        } else {
+            return std::apply(
+                std::get<Index>(std::forward<Tuple>(tuple)),
+                invoke_index<Index - 1>(std::forward<Tuple>(tuple),
+                                        std::forward<Args>(args)...));
+        }
     }
 }
 

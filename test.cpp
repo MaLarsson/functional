@@ -5,7 +5,11 @@
 
 int main() {
     auto test = fn::chain([](int i, int j) { return i + j; },
-                          [](int i) { return i * 2; });
+                          [](int i) { return i * 2; },
+                          [](int i) -> std::tuple<int, int> {
+                              return {i, i};
+                          },
+                          [](int i, int j) { return i + j; });
 
     std::cout << test(1, 2) << '\n';
 
