@@ -16,5 +16,9 @@ int main() {
     std::cout << test2(1)(2, 3) << ", ";
     std::cout << test2(1, 2, 3) << '\n';
 
+    auto test3 = fn::curry<0>([]() { return 42; });
+
+    std::cout << test3() << '\n';
+
     return 0;
 }

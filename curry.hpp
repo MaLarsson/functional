@@ -39,10 +39,16 @@ constexpr decltype(auto) curry_or_invoke(F&& f, Args&&... args) {
 
 template <std::size_t N, typename F>
 constexpr auto curry(F&& f) {
-    return [f = std::forward<F>(f)](auto&&... args) -> decltype(auto) {
-        return detail::curry_or_invoke<N>(
-            std::move(f), std::forward<decltype(args)>(args)...);
-    };
+    if constexpr (N == 0) {
+        return [f = std::forward<F>(f)]() -> decltype(auto) {
+            return std::invoke(std::move(f));
+        };
+    } else {
+        return [f = std::forward<F>(f)](auto&&... args) -> decltype(auto) {
+            return detail::curry_or_invoke<N>(
+                std::move(f), std::forward<decltype(args)>(args)...);
+        };
+    }
 }
 
 }  // namespace fn
