@@ -2,6 +2,7 @@
 
 #include "chain.hpp"
 #include "curry.hpp"
+#include "overload.hpp"
 
 int main() {
     auto test = fn::chain([](int i, int j) { return i + j; },
@@ -23,6 +24,18 @@ int main() {
     auto test3 = fn::curry<0>([]() { return 42; });
 
     std::cout << test3() << '\n';
+
+    auto test4 = fn::overload([](int i) { return i; },
+                              [](const char* str) { return str; });
+
+    std::cout << test4(42) << ", ";
+    std::cout << test4("test") << '\n';
+
+    auto test5 = fn::overload([](int) { return "int"; },
+                              [](const char*) { return "string"; });
+
+    std::cout << test5(42) << ", ";
+    std::cout << test5("test") << '\n';
 
     return 0;
 }
