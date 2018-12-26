@@ -22,9 +22,12 @@ constexpr decltype(auto) recursive_curry(F&& f, Tuple&& tuple,
 
 template <std::size_t N, typename F, typename... Args>
 constexpr decltype(auto) curry_or_invoke(F&& f, Args&&... args) {
+    static_assert(sizeof...(Args) <= N,
+                  "fn::curry invoked with too many arguments");
+
     if constexpr (sizeof...(Args) == N) {
         return std::invoke(std::forward<F>(f), std::forward<Args>(args)...);
-    } else {
+    } else if constexpr (sizeof...(Args) < N) {
         return [args = std::make_tuple(std::forward<Args>(args)...),
                 f = std::forward<F>(f)](auto&&... new_args) -> decltype(auto) {
             return recursive_curry<N>(
